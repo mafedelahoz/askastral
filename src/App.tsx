@@ -15,23 +15,22 @@ const App = () => {
     error?: string;
   }
 
-  const [responses, setResponses] = useState<Response[]>([]);
+  const [response, setResponse] = useState<Response | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const planetsToCheck = ["venus", "mars", "mercury", "jupiter", "saturn"];
   const API_URL = "https://askastral-api.onrender.com";
 
   const fetchPlanetData = async () => {
     setLoading(true);
-    setResponses([]);
+    setResponse(null); 
 
     try {
       const res = await fetch(`${API_URL}/daily-insight`);
       const data = await res.json();
-      setResponses(data.daily_insight || []);
+      setResponse(data.most_influential || null); 
     } catch (error) {
       console.error("Error fetching data:", error);
-      setResponses([{ error: "🌌 Could not connect to the cosmos." }]);
+      setResponse({ error: "🌌 Could not connect to the cosmos." });
     } finally {
       setLoading(false);
     }
@@ -51,45 +50,37 @@ const App = () => {
           onClick={fetchPlanetData}
           className="bg-gray-600 hover:bg-purple-700 text-white py-3 px-6 rounded-2xl text-lg font-semibold transition duration-200"
         >
-           Get Insight
+          Get Insight
         </button>
 
         {loading && <p className="mt-6">✨ Reading the skies...</p>}
 
-        <div className="mt-6 text-left space-y-6">
-          {responses.map((res, index) =>
-            res.error ? (
-              <p key={index} className="text-red-400">
-                {res.error}
-              </p>
+        <div className="mt-6 text-left">
+          {response ? (
+            response.error ? (
+              <p className="text-red-400">{response.error}</p>
             ) : (
-              <div
-                key={index}
-                className="bg-white bg-opacity-10 p-5 rounded-xl backdrop-blur border border-white border-opacity-20"
-              >
+              <div className="bg-white bg-opacity-10 p-5 rounded-xl backdrop-blur border border-white border-opacity-20">
                 <p className="text-xl font-bold uppercase mb-2">
-                  {res.planet} in {res.zodiac_sign}
-                  {res.retrograde && (
+                  {response.planet} in {response.zodiac_sign}
+                  {response.retrograde && (
                     <span className="ml-2 text-sm bg-red-600 px-2 py-1 rounded-full">
                       Retrograde
                     </span>
                   )}
                 </p>
                 <p className="mb-2">
-                  <span className="font-semibold">Summary:</span>{" "}
-                  {res.prediction?.summary}
+                  <span className="font-semibold">Summary:</span> {response.prediction?.summary}
                 </p>
                 <p className="mb-2">
-                  <span className="font-semibold">Advice:</span>{" "}
-                  {res.prediction?.advice}
+                  <span className="font-semibold">Advice:</span> {response.prediction?.advice}
                 </p>
                 <p>
-                  <span className="font-semibold">Vibe:</span>{" "}
-                  {res.prediction?.vibe}
+                  <span className="font-semibold">Vibe:</span> {response.prediction?.vibe}
                 </p>
               </div>
             )
-          )}
+          ) : null}
         </div>
       </div>
     </div>
